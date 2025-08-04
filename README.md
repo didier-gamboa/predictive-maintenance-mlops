@@ -59,6 +59,45 @@ predictive-maintenance-mlops/
 
 
 --------
-<p><small>Project based on the <a target="_blank" href="https://github.com/Chim-SO/cookiecutter-mlops/">cookiecutter MLOps project template</a>
-that is originally based on <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. 
-#cookiecuttermlops #cookiecutterdatascience</small></p>
+
+## Dataset Setup
+
+This project uses the [Microsoft Azure Predictive Maintenance Dataset](https://www.kaggle.com/datasets/arnabbiswas1/microsoft-azure-predictive-maintenance) available on Kaggle.
+
+To reproduce the dataset locally, follow the steps below.
+
+### 1. Configure Kaggle API Credentials
+
+1. Go to [https://www.kaggle.com](https://www.kaggle.com) and log into your account.
+2. Click your profile picture (top right), then select **Settings**.
+3. Scroll down to the **API** section and click **"Create New API Token"**.
+4. A file named `kaggle.json` will be downloaded automatically.
+
+Open `kaggle.json` and extract your credentials to create a `.env` file at the project root with the following content:
+
+```bash
+KAGGLE_USERNAME=your_kaggle_username
+KAGGLE_KEY=your_kaggle_api_key
+```
+
+### 2. Download the Dataset
+
+Once your `.env` file is ready, run the following command from the root of the project:
+
+```python
+python src/data/download.py
+```
+
+This will:
+
+- Load Kaggle credentials from the `.env` file
+- Download the dataset using `kagglehub`
+- Move the following CSV files to `data/raw/`:
+
+```bash
+PdM_telemetry.csv
+PdM_errors.csv
+PdM_failures.csv
+PdM_machines.csv
+PdM_maint.csv
+```
