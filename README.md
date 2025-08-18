@@ -130,7 +130,7 @@ You should see output confirming user creation.
 Run the core Airflow services:  
 
 ```bash
-docker-compose -f docker-compose.airflow.yml up -d     airflow-scheduler     airflow-webserver     airflow-worker     postgres     redis
+docker-compose -f docker-compose.airflow.yml up -d     airflow-scheduler     airflow-webserver
 ```
 
 Airflow UI should be available at [http://localhost:8080](http://localhost:8080).  
