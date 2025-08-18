@@ -1,7 +1,7 @@
 x-env-common: &env_common
   PYTHONPATH: /opt/airflow/repo
   REPO_ROOT: /opt/airflow/repo
-  MLFLOW_TRACKING_URI: /opt/airflow/repo/mlruns
+  MLFLOW_TRACKING_URI: file:///opt/airflow/repo/mlruns
   AIRFLOW__CORE__LOAD_EXAMPLES: "False"
 
 services:

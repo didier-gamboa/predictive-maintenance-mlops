@@ -1,0 +1,15 @@
+artifact_uri: /Users/didiergamboa/Documents/Walmart/predictive-maintenance-mlops/mlruns/955835378056646302/f47be985f7ec43de90c3b5fee9f4d3ca/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '955835378056646302'
+lifecycle_stage: active
+run_id: f47be985f7ec43de90c3b5fee9f4d3ca
+run_name: mc_search
+run_uuid: f47be985f7ec43de90c3b5fee9f4d3ca
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1755531119968
+status: 1
+tags: []
+user_id: airflow
