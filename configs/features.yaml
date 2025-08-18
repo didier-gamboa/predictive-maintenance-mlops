@@ -1,0 +1,19 @@
+# Base hourly grid aligned to telemetry timeline for each machine
+align_to_hourly_grid: true
+
+# Telemetry 
+windows_hours: [24]                   
+telemetry_stats: ["mean", "std"]      
+
+# Error logs 
+use_error_counts: true
+error_count_windows: [24]
+
+# Maintenance: “days since last replacement” per component
+maint_time_since_replacement_days: true
+
+# Machine static attributes
+use_machine_meta: true                
+
+# Leakage control reference (kept for compatibility)
+max_rolling_hours: 24

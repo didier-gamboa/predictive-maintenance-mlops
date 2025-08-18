@@ -1,0 +1,48 @@
+target_mc: "failure_comp"      
+target_bin: "failure_binary"   
+seed: 42
+
+imputation: "median"           
+scaler: "none"                  
+one_hot_max_categories: 16
+
+# Which metrics to compute and log
+primary_scorer: "f1_macro_fail_only"   
+report_metrics: ["f1_macro", "f1_weighted", "accuracy", "confusion"]
+
+# Choose Run Mode
+mode: "search"                  # "single" | "search"
+
+# SINGLE
+model: "xgboost"                # "hgb" | "xgboost"
+params:
+  n_estimators: 300
+  max_depth: 5
+  learning_rate: 0.08
+  subsample: 0.9
+  colsample_bytree: 0.9
+
+# SEARCH
+search:
+  estimators: ["hgb", "xgboost"]        # run both and compare
+  scoring: "f1_macro"                   
+  cv:
+    type: "timeseries"                  
+    n_splits: 3
+    gap_hours: 0                        
+    shuffle: false
+    seed: 42
+  strategy: "grid"                      
+  n_iter: 12                            
+
+  grids:
+    hgb:
+      max_iter:      [200, 400]
+      learning_rate: [0.05, 0.10]
+      max_depth:     [null, 6]
+    xgboost:
+      n_estimators:  [200, 400]
+      max_depth:     [4, 6]
+      learning_rate: [0.05, 0.10]
+      subsample:     [0.9]              
+      colsample_bytree: [0.9]          

@@ -1,0 +1,136 @@
+x-env-common: &env_common
+  PYTHONPATH: /opt/airflow/repo
+  REPO_ROOT: /opt/airflow/repo
+  MLFLOW_TRACKING_URI: /opt/airflow/repo/mlruns
+  AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # platform: linux/amd64   
+
+  airflow-init:
+    build:
+      context: .
+      dockerfile: dockerfile.airflow
+    image: pm-airflow:2.9.2
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      <<: *env_common
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/repo/src
+      - ./configs:/opt/airflow/repo/configs
+      - ./data:/opt/airflow/repo/data
+      - ./models:/opt/airflow/repo/models
+      - ./mlruns:/opt/airflow/repo/mlruns
+    entrypoint: >
+      bash -lc "airflow db migrate && airflow users create --username admin --password admin --firstname Air --lastname Flow --role Admin --email admin@example.com || true"
+
+  airflow-webserver:
+    image: pm-airflow:2.9.2
+    working_dir: /opt/airflow/repo
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    environment:
+      <<: *env_common
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__WEBSERVER__SECRET_KEY: devkey
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/repo/src
+      - ./configs:/opt/airflow/repo/configs
+      - ./data:/opt/airflow/repo/data
+      - ./models:/opt/airflow/repo/models
+      - ./mlruns:/opt/airflow/repo/mlruns
+    ports:
+      - "8080:8080"
+    command: >
+      bash -lc "airflow webserver -p 8080"
+    # platform: linux/amd64
+
+  airflow-scheduler:
+    image: pm-airflow:2.9.2
+    working_dir: /opt/airflow/repo
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    environment:
+      <<: *env_common
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__WEBSERVER__SECRET_KEY: devkey
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/repo/src
+      - ./configs:/opt/airflow/repo/configs
+      - ./data:/opt/airflow/repo/data
+      - ./models:/opt/airflow/repo/models
+      - ./mlruns:/opt/airflow/repo/mlruns
+    command: >
+      bash -lc "airflow scheduler"
+    # platform: linux/amd64
+
+  # MLflow UI 
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.15.0
+    environment:
+      MLFLOW_BACKEND_STORE_URI: /mlruns
+      MLFLOW_ARTIFACT_ROOT: /artifacts
+    volumes:
+      - ./mlruns:/mlruns
+      - ./models:/artifacts
+    ports:
+      - "5500:5000"
+    command: >
+      mlflow server --backend-store-uri /mlruns --default-artifact-root /artifacts
+      --host 0.0.0.0 --port 5000
+
+  # API Flask 
+  api:
+    build:
+      context: .
+      dockerfile: dockerfile.api
+    environment:
+      ARTIFACTS_DIR: /app/models
+    volumes:
+      - ./models:/app/models:ro
+    ports:
+      - "8081:8081"
+    # platform: linux/amd64
+
+  # Streamlit 
+  streamlit:
+    build:
+      context: .
+      dockerfile: dockerfile.streamlit
+    environment:
+      ARTIFACTS_DIR: /app/models
+    volumes:
+      - ./models:/app/models:ro
+    ports:
+      - "8501:8501"
+    # platform: linux/amd64
+
+volumes:
+  pgdata:

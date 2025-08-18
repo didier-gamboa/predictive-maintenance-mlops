@@ -1,103 +1,253 @@
-predictive-maintenance-mlops
-==============================
+# Predictive Maintenance MLOps  
 
-End-to-end MLOps solution for predictive maintenance using the Microsoft Azure dataset. Includes training pipeline, model deployment via FastAPI, Dockerized APIs, and technical documentation.
+End-to-end **MLOps solution** for predictive maintenance using the Microsoft Azure dataset.  
+This project implements the full ML lifecycle:  
 
-Project Organization
-------------
+- **Data ingestion & preprocessing** (ETL pipelines, feature engineering, labeling, train/test split)  
+- **Training & experiment tracking** with MLflow  
+- **Orchestration** using Apache Airflow  
+- **Model deployment** via Flask REST API  
+- **Visualization & monitoring** via Streamlit  
+- **Containerized services** with Docker Compose  
+
+
+
+## 📂 Project Organization  
 
 ```
 predictive-maintenance-mlops/
-├── LICENSE     
-├── README.md                  
-├── Makefile                     # Makefile with commands like `make data` or `make train`                   
-├── configs                      # Config files (models and training hyperparameters)
-│   └── model1.yaml              
+├── LICENSE
+├── README.md
+├── Makefile                     # Utility commands (make train, make test, etc.)
 │
-├── data                         
-│   ├── external                 # Data from third party sources.
-│   ├── interim                  # Intermediate data that has been transformed.
-│   ├── processed                # The final, canonical data sets for modeling.
-│   └── raw                      # The original, immutable data dump.
+├── configs                      # YAML configuration files
+│   ├── data.yaml
+│   ├── features.yaml
+│   ├── labeling.yaml
+│   ├── split.yaml
+│   ├── tracking.yaml
+│   └── train.yaml
 │
-├── docs                         # Project documentation.
+├── dags                         # Airflow DAGs
+│   └── predictive_maintenance_dag.py
 │
-├── models                       # Trained and serialized models.
+├── data                         # Data lakehouse folders
+│   ├── external
+│   ├── interim
+│   ├── processed
+│   └── raw
 │
-├── notebooks                    # Jupyter notebooks.
+├── docs                         # Documentation
 │
-├── references                   # Data dictionaries, manuals, and all other explanatory materials.
+├── mlruns                       # MLflow tracking logs
+├── models                       # Trained models and artifacts
 │
-├── reports                      # Generated analysis as HTML, PDF, LaTeX, etc.
-│   └── figures                  # Generated graphics and figures to be used in reporting.
+├── notebooks                    # Jupyter notebooks (EDA, feature engineering, modeling)
+│   ├── 01_eda.ipynb
+│   ├── 02_feature_engineering.ipynb
+│   └── 03_modeling.ipynb
 │
-├── requirements.txt             # The requirements file for reproducing the analysis environment.
-└── src                          # Source code for use in this project.
-    ├── __init__.py              # Makes src a Python module.
-    │
-    ├── data                     # Data engineering scripts.
-    │   ├── build_features.py    
-    │   ├── cleaning.py          
-    │   ├── ingestion.py         
-    │   ├── labeling.py          
-    │   ├── splitting.py         
-    │   └── validation.py        
-    │
-    ├── models                   # ML model engineering (a folder for each model).
-    │   └── model1      
-    │       ├── dataloader.py    
-    │       ├── hyperparameters_tuning.py 
-    │       ├── model.py         
-    │       ├── predict.py       
-    │       ├── preprocessing.py 
-    │       └── train.py         
-    │
-    └── visualization        # Scripts to create exploratory and results oriented visualizations.
-        ├── evaluation.py        
-        └── exploration.py       
+├── src                          # Source code
+│   ├── common                   # Logging, config & tracking utils
+│   │   ├── config.py
+│   │   ├── logging.py
+│   │   └── tracking.py
+│   │
+│   ├── data                     # Data pipeline (ingestion, preprocessing, etc.)
+│   ├── models                   # Training, prediction & evaluation
+│   │   ├── train.py
+│   │   ├── predict.py
+│   │   └── evaluate.py
+│   │
+│   └── visualization            # Visualization scripts
+│
+├── app                          # Deployment
+│   └── flask_app.py             # Flask REST API
+│
+├── requirements-base.txt        # Base dependencies
+├── requirements-api.txt         # API dependencies
+├── requirements-streamlit.txt   # Streamlit dependencies
+│
+├── docker-compose.airflow.yml   # Multi-service Docker setup
+├── dockerfile.airflow
+├── dockerfile.api
+├── dockerfile.streamlit
+└── environment.yml              # Conda environment
 ```
 
 
---------
 
-## Dataset Setup
+## ⚙️ Setup & Installation  
 
-This project uses the [Microsoft Azure Predictive Maintenance Dataset](https://www.kaggle.com/datasets/arnabbiswas1/microsoft-azure-predictive-maintenance) available on Kaggle.
+### 1. Clone repository  
 
-To reproduce the dataset locally, follow the steps below.
+```bash
+git clone https://github.com/<your-username>/predictive-maintenance-mlops.git
+cd predictive-maintenance-mlops
+```
 
-### 1. Configure Kaggle API Credentials
+### 2. Configure Kaggle credentials  
 
-1. Go to [https://www.kaggle.com](https://www.kaggle.com) and log into your account.
-2. Click your profile picture (top right), then select **Settings**.
-3. Scroll down to the **API** section and click **"Create New API Token"**.
-4. A file named `kaggle.json` will be downloaded automatically.
-
-Open `kaggle.json` and extract your credentials to create a `.env` file at the project root with the following content:
+Create a `.env` file in the project root:  
 
 ```bash
 KAGGLE_USERNAME=your_kaggle_username
 KAGGLE_KEY=your_kaggle_api_key
 ```
 
-### 2. Download the Dataset
+### 3. Download dataset  
 
-Once your `.env` file is ready, run the following command from the root of the project:
-
-```python
+```bash
 python src/data/download.py
 ```
 
-This will:
+This will download the **Microsoft Azure Predictive Maintenance Dataset** into `data/raw/`.
 
-- Load Kaggle credentials from the `.env` file
-- Download the dataset using `kagglehub`
-- Move the following CSV files to `data/raw/`:
+
+
+## 🐳 Running the Full Stack with Docker  
+
+The system runs fully containerized with **Docker Compose**.  
+
+### Step 1 — Initialize Airflow  
+
+Before first use, run:  
 
 ```bash
-PdM_telemetry.csv
-PdM_errors.csv
-PdM_failures.csv
-PdM_machines.csv
-PdM_maint.csv
+docker-compose -f docker-compose.airflow.yml up airflow-init
 ```
+
+This will:  
+- Migrate the Airflow DB  
+- Create the default **Admin user** (`admin/admin`)  
+
+You should see output confirming user creation.  
+
+
+
+### Step 2 — Start Core Services  
+
+Run the core Airflow services:  
+
+```bash
+docker-compose -f docker-compose.airflow.yml up -d     airflow-scheduler     airflow-webserver     airflow-worker     postgres     redis
+```
+
+Airflow UI should be available at [http://localhost:8080](http://localhost:8080).  
+
+Login with:  
+- **Username**: `admin`  
+- **Password**: `admin`  
+
+
+
+### Step 3 — Start Optional Services  
+
+#### MLflow  
+
+```bash
+docker-compose -f docker-compose.airflow.yml up -d mlflow
+```
+
+MLflow UI → [http://localhost:5500](http://localhost:5500)  
+
+#### Flask API  
+
+```bash
+docker-compose -f docker-compose.airflow.yml up -d api
+```
+
+API → [http://localhost:8081](http://localhost:8081)  
+
+#### Streamlit Dashboard  
+
+```bash
+docker-compose -f docker-compose.airflow.yml up -d streamlit
+```
+
+Streamlit → [http://localhost:8501](http://localhost:8501)  
+
+
+
+## 📊 Workflow  
+
+1. **Data Pipeline**  
+   Airflow DAG pulls raw data → processes into features → saves in `/data/processed`.  
+
+2. **Model Training**  
+   Trigger training DAG in Airflow or run manually:  
+
+   ```bash
+   python src/models/train.py
+   ```
+
+   Results are logged to MLflow.  
+
+3. **Experiment Tracking**  
+   Compare models in MLflow UI and select the best.  
+
+4. **Deployment**  
+   The selected model is exported into `/models` and served via Flask API.    
+
+
+## ✅ Example API Usage  
+
+### Healthcheck  
+
+```bash
+curl http://localhost:8081/health
+```
+
+### Predict  
+
+```bash
+curl -X POST http://localhost:8081/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "volt": 168.2,
+    "rotate": 420.5,
+    "pressure": 112.9,
+    "vibration": 46.3,
+
+    "volt_mean_24h": 167.9,
+    "volt_std_24h": 1.8,
+    "rotate_mean_24h": 421.2,
+    "rotate_std_24h": 3.1,
+    "pressure_mean_24h": 113.1,
+    "pressure_std_24h": 0.9,
+    "vibration_mean_24h": 45.8,
+    "vibration_std_24h": 1.2,
+
+    "error1_count_24h": 0,
+    "error2_count_24h": 1,
+    "error3_count_24h": 0,
+    "error4_count_24h": 0,
+    "error5_count_24h": 0,
+
+    "comp1": 12.0,
+    "comp2": 33.0,
+    "comp3": 7.0,
+    "comp4": 55.0,
+
+    "model": "M",
+    "age": 8
+  }'
+```
+
+### Response
+The API returns per-class probabilities plus the top-1 class:
+```
+{
+  "proba_comp1": 0.04,
+  "proba_comp2": 0.07,
+  "proba_comp3": 0.12,
+  "proba_comp4": 0.10,
+  "proba_none": 0.67,
+  "pred_class": "none"
+}
+```
+
+## 🔮 Next Steps  
+
+- Add CI/CD with GitHub Actions.  
+- Extend monitoring with Prometheus + Grafana.  
