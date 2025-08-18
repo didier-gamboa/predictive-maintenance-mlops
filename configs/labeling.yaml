@@ -1,0 +1,12 @@
+# Predict the first failure within (t, t + horizon)
+horizon_hours: 24
+min_history_hours: 24
+none_class: "none"
+
+# Trace target
+emit_binary: true
+binary_col: "failure_binary"
+multiclass_col: "failure_comp"
+
+# Allowed failures
+allowed_failure_classes: ["comp1", "comp2", "comp3", "comp4"]

@@ -1,0 +1,12 @@
+# MLflow
+mlflow_uri: "mlruns"              
+experiment: "azure-pm"
+run_name_prefix: "mc"
+
+# Artifacts 
+artifacts_dir: "models"
+log_evaluation_to_mlflow: true
+tags:
+  project: "predictive-maintenance"
+  problem: "multiclass"
+  split: "time_fraction_80_20_gap24h"

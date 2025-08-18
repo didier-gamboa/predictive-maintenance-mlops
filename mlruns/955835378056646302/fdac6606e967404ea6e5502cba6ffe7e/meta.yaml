@@ -1,0 +1,15 @@
+artifact_uri: /Users/didiergamboa/Documents/Walmart/predictive-maintenance-mlops/mlruns/955835378056646302/fdac6606e967404ea6e5502cba6ffe7e/artifacts
+end_time: 1755507369632
+entry_point_name: ''
+experiment_id: '955835378056646302'
+lifecycle_stage: active
+run_id: fdac6606e967404ea6e5502cba6ffe7e
+run_name: mc_search
+run_uuid: fdac6606e967404ea6e5502cba6ffe7e
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1755506986252
+status: 3
+tags: []
+user_id: didiergamboa

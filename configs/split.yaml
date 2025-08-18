@@ -1,0 +1,5 @@
+strategy: "time_fraction"     
+
+time_fraction:
+  train_fraction: 0.80        
+  gap_hours: 24 

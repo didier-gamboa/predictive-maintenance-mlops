@@ -1,0 +1,34 @@
+name: predictive-maintenance-mlops
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Core
+  - python=3.11
+  - pip
+  - numpy=1.26.4
+  - pandas=2.2.2
+  - scikit-learn=1.5.1
+  - xgboost=2.1.1
+
+  # Jupyter + EDA
+  - jupyterlab=4.2.5
+  - notebook=7.2.2
+  - ipykernel=6.29.5
+  - ipywidgets=8.1.5
+  - matplotlib=3.8.4
+  - seaborn=0.13.2
+
+  # Serialization & configs
+  - pyyaml=6.0.2
+  - python-dotenv=1.0.1
+
+  # Tracking
+  - mlflow=2.14.1
+
+  # Parquet / Arrow
+  - pyarrow=15.0.2
+
+  # Pip-only section (anything not well packaged in conda)
+  - pip:
+      - protobuf==3.20.3

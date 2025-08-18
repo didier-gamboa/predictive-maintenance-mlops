@@ -1,0 +1,5 @@
+-r requirements-base.txt
+flask==2.3.3
+werkzeug==2.3.8
+gunicorn==22.0.0
+flask-cors==4.0.1

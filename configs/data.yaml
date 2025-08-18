@@ -1,0 +1,20 @@
+raw_dir: "data/raw"
+interim_dir: "data/interim"
+processed_dir: "data/processed"
+
+files:
+  telemetry: "PdM_telemetry.csv"   # time-series sensors
+  errors:    "PdM_errors.csv"      # error events 
+  maintenance: "PdM_maint.csv"     # maintenance events
+  failures:  "PdM_failures.csv"    # failure events 
+  machines:  "PdM_machines.csv"    # machine metadata 
+
+keys:
+  time: "datetime"         
+  id:   "machineID"
+
+sensors: ["volt", "rotate", "pressure", "vibration"]
+meta:    ["model", "age"]     
+errors_col: "errorID"        
+maint_col:  "comp"            
+fail_col:   "failure"         
